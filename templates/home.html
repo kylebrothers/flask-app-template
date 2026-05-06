@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Home — {{ config.APP_NAME | default('App') }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            {# ── Hero ── #}
+            <div class="text-center mb-5">
+                <div class="mb-3">
+                    <i class="fas fa-tools fa-3x text-primary"></i>
+                </div>
+                <h1 class="display-5 fw-bold text-primary mb-2">
+                    {{ config.APP_NAME | default('App') }}
+                </h1>
+                <p class="lead text-muted">
+                    {# Override app_description in app/templates/home.html #}
+                    {% block app_description %}
+                    A Flask-based tool suite powered by Claude AI.
+                    {% endblock %}
+                </p>
+            </div>
+
+            {# ── Tool cards ── #}
+            {% if available_pages %}
+            <div class="row g-4 mb-5">
+                {% for page in available_pages %}
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start">
+                                <div class="me-3 mt-1">
+                                    <i class="fas fa-file-alt fa-lg text-primary"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title fw-semibold mb-1">{{ page.name }}</h5>
+                                    {#
+                                        To add per-page descriptions, override this template
+                                        in app/templates/home.html and use a dict lookup:
+                                        {{ descriptions[page.name] | default('') }}
+                                    #}
+                                    <a href="{{ page.url }}"
+                                       class="btn btn-sm btn-outline-primary mt-2">
+                                        Open <i class="fas fa-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info border-0 text-center">
+                <i class="fas fa-info-circle me-2"></i>
+                No tool pages found. Add a template to <code>app/templates/</code>
+                and restart the container.
+            </div>
+            {% endif %}
+
+            {# ── Status card ── #}
+            <div class="card border-0 bg-light">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-circle fa-sm
+                                {% if config.get('CLAUDE_AVAILABLE', false) %}
+                                    text-success
+                                {% else %}
+                                    text-warning
+                                {% endif %}">
+                            </i>
+                        </div>
+                        <small class="text-muted">
+                            Claude API:
+                            <span id="claude-status">checking…</span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Check Claude availability from the health endpoint
+    fetch('/health')
+        .then(r => r.json())
+        .then(data => {
+            const el = document.getElementById('claude-status');
+            if (data.claude_available) {
+                el.textContent = 'available';
+                el.classList.add('text-success', 'fw-semibold');
+            } else {
+                el.textContent = 'unavailable (check CLAUDE_API_KEY)';
+                el.classList.add('text-warning');
+            }
+        })
+        .catch(() => {
+            document.getElementById('claude-status').textContent = 'unknown';
+        });
+</script>
+{% endblock %}

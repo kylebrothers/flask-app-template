@@ -1,0 +1,23 @@
+# ── app/requirements.txt ─────────────────────────────────────────────────────
+#
+# App-specific Python packages. These are installed on top of the template's
+# base requirements (Flask, anthropic, gunicorn, python-dotenv, Flask-Limiter).
+#
+# Common packages by use case:
+#
+#   File processing:
+#     python-docx       Word document read/write
+#     PyPDF2            PDF text extraction
+#     openpyxl          Excel read/write
+#
+#   HTTP / APIs:
+#     requests          HTTP client for external APIs
+#
+#   Data:
+#     pandas            Dataframe processing (e.g. CSV analysis)
+#
+#   Images:
+#     Pillow            Image processing
+#
+# Leave this file empty if the app has no additional dependencies.
+# ─────────────────────────────────────────────────────────────────────────────

@@ -1,0 +1,71 @@
+# ── new-app-starter/docker-compose.yml ────────────────────────────────────────
+#
+# PLACEHOLDERS — find and replace before use:
+#   myapp          → your app name (lowercase, hyphens ok)
+#   myapp_logs     → {appname}_logs
+#   myapp_server_files → {appname}_server_files
+#   :/Docker/myapp/ → :/Docker/{appname}/
+#   container_name: myapp → container_name: {appname}
+#   myapp-network  → {appname}-network
+#
+# See README.md §new-app-starter for the full substitution table.
+# ─────────────────────────────────────────────────────────────────────────────
+
+version: '3.8'
+
+services:
+  myapp:
+    build: .
+    container_name: myapp
+    ports:
+      - "${HOST_PORT:-5000}:5000"
+    environment:
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - FLASK_DEBUG=${FLASK_DEBUG:-false}
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - APP_NAME=${APP_NAME:-myapp}
+    env_file:
+      # .env lives on the NAS, not in the repo.
+      # Path is constructed as: NAS_MOUNT_PATH/config/APP_NAME/.env
+      # The Makefile mounts the NAS and sets this path before docker-compose runs.
+      - ${ENV_FILE_PATH:-/mnt/nas/config/myapp/.env}
+    volumes:
+      - myapp_logs:/app/logs
+      - myapp_server_files:/app/server_files
+      # ── Optional: add a database volume if the app uses SQLite ──
+      # - myapp_database:/app/database
+      #
+      # ── Optional: NAS override for live template editing during development ──
+      # Remove before committing. See README §Development Workflow.
+      # - /mnt/nas/dev/myapp/templates:/app/templates
+    restart: unless-stopped
+    networks:
+      - myapp-network
+
+volumes:
+  myapp_logs:
+    driver: local
+    driver_opts:
+      type: nfs
+      device: ":/Docker/myapp/logs"
+      o: "nfsvers=4,addr=${NAS_IP:-192.168.0.134},nolock,soft,rw"
+
+  myapp_server_files:
+    driver: local
+    driver_opts:
+      type: nfs
+      device: ":/Docker/myapp/server_files"
+      o: "nfsvers=4,addr=${NAS_IP:-192.168.0.134},nolock,soft,rw"
+
+  # ── Uncomment if the app uses SQLite persistence ──
+  # myapp_database:
+  #   driver: local
+  #   driver_opts:
+  #     type: nfs
+  #     device: ":/Docker/myapp/database"
+  #     o: "nfsvers=4,addr=${NAS_IP:-192.168.0.134},nolock,soft,rw"
+
+networks:
+  myapp-network:
+    driver: bridge

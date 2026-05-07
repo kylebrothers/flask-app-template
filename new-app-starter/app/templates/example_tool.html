@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{#
+    example_tool.html — Functional minimal example page.
+
+    This demonstrates the standard page pattern:
+      - Form with a text field and optional file upload
+      - Submits to /api/example-tool via fetch
+      - Displays Claude's response as formatted markdown
+      - Handles loading state, errors, and result display
+
+    When building a real page:
+      - Rename this file to your_tool_name.html (URL will be /your-tool-name)
+      - Update the page title, description, and form fields
+      - Update the claude_prompt hidden field to match your use case
+      - Remove or replace the file upload field if not needed
+      - Update the result display section to match your expected output format
+      PLACEHOLDER: Replace all instances of "Example Tool" with your tool name.
+#}
+
+{% block title %}Example Tool — {{ config.APP_NAME | default('App') }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            {# ── Page header ── #}
+            <div class="mb-4">
+                <h2 class="fw-bold text-primary">
+                    <i class="fas fa-magic me-2"></i>
+                    {# PLACEHOLDER: Replace with your tool name #}
+                    Example Tool
+                </h2>
+                <p class="text-muted">
+                    {# PLACEHOLDER: Replace with your tool description #}
+                    A minimal working example. Describe what this tool does in one or two sentences.
+                </p>
+                <hr class="text-muted">
+            </div>
+
+            {# ── Input card ── #}
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white border-0 py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        {# PLACEHOLDER: Replace with your input section label #}
+                        Your Input
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form id="pageForm" enctype="multipart/form-data">
+
+                        {# ── System fields — do not remove ── #}
+                        <input type="hidden" name="page_type" value="claude-call">
+                        {#
+                            claude_prompt is the instruction sent to Claude along with
+                            all other form data, uploaded files, and server files.
+                            PLACEHOLDER: Replace with your actual prompt.
+                        #}
+                        <input type="hidden" name="claude_prompt"
+                               value="Please respond to the user's input below. Be concise and helpful.">
+
+                        {# ── PLACEHOLDER: Replace/add form fields below ── #}
+
+                        {# Text input example #}
+                        <div class="mb-4">
+                            <label for="user_input" class="form-label fw-semibold">
+                                <i class="fas fa-comment me-2 text-primary"></i>
+                                Your Question or Input
+                                <span class="text-danger ms-1">*</span>
+                            </label>
+                            <textarea id="user_input" name="user_input"
+                                      class="form-control form-control-lg"
+                                      rows="4"
+                                      placeholder="Type your input here..."
+                                      required></textarea>
+                            <div class="form-text">
+                                {# PLACEHOLDER: Update helper text #}
+                                Enter the information you want Claude to process.
+                            </div>
+                        </div>
+
+                        {# Optional file upload example #}
+                        <div class="mb-4">
+                            <label for="document_file" class="form-label fw-semibold">
+                                <i class="fas fa-paperclip me-2 text-primary"></i>
+                                Supporting Document
+                                <span class="text-muted fw-normal">(optional)</span>
+                            </label>
+                            <input type="file" id="document_file" name="document_file"
+                                   class="form-control form-control-lg"
+                                   accept=".docx,.pdf,.txt">
+                            <div class="form-text">
+                                {# PLACEHOLDER: Update or remove #}
+                                Accepted formats: .docx, .pdf, .txt — Max 10MB.
+                            </div>
+                        </div>
+
+                        {# ── Submit button ── #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" id="submitBtn" class="btn btn-primary btn-lg">
+                                <span class="btn-text">
+                                    <i class="fas fa-magic me-2"></i>
+                                    {# PLACEHOLDER: Replace with your action label #}
+                                    Generate Response
+                                </span>
+                                <span class="spinner d-none">
+                                    <span class="spinner-border spinner-border-sm me-2"
+                                          role="status" aria-hidden="true"></span>
+                                    Processing…
+                                </span>
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+            {# ── Error display ── #}
+            <div id="error-area" class="mt-4" style="display:none;">
+                <div class="alert alert-danger border-0">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <span id="error-title">Error</span>
+                    </h6>
+                    <p id="error-message" class="mb-0"></p>
+                </div>
+            </div>
+
+            {# ── Result display ── #}
+            <div id="result-area" class="mt-4" style="display:none;">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-success text-white border-0 py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-check-circle me-2"></i>
+                            {# PLACEHOLDER: Replace with your result section label #}
+                            Result
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+
+                        {# Rendered markdown output #}
+                        <div id="result-content"
+                             style="white-space: pre-wrap; line-height: 1.7; color: #333;">
+                        </div>
+
+                        <hr class="my-4">
+
+                        {# Action buttons #}
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button onclick="copyResult()"
+                                    class="btn btn-outline-primary">
+                                <i class="fas fa-copy me-2"></i>Copy
+                            </button>
+                            <button onclick="resetForm()"
+                                    class="btn btn-outline-secondary">
+                                <i class="fas fa-redo me-2"></i>Start Over
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // ── Form submission ────────────────────────────────────────────────────────
+    document.getElementById('pageForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        hideError();
+
+        const submitBtn  = document.getElementById('submitBtn');
+        const btnText    = submitBtn.querySelector('.btn-text');
+        const spinner    = submitBtn.querySelector('.spinner');
+        const resultArea = document.getElementById('result-area');
+
+        // Loading state
+        submitBtn.disabled = true;
+        btnText.classList.add('d-none');
+        spinner.classList.remove('d-none');
+        resultArea.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/{{ page_name }}', {
+                method: 'POST',
+                body: new FormData(this)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                showError(
+                    'Processing Error',
+                    data.error || 'An unexpected error occurred. Check the server logs.'
+                );
+                return;
+            }
+
+            // Display result
+            document.getElementById('result-content').textContent = data.content;
+            resultArea.style.display = 'block';
+            resultArea.scrollIntoView({ behavior: 'smooth' });
+
+        } catch (err) {
+            showError('Network Error', 'Could not reach the server. Please try again.');
+            console.error(err);
+        } finally {
+            submitBtn.disabled = false;
+            btnText.classList.remove('d-none');
+            spinner.classList.add('d-none');
+        }
+    });
+
+    // ── Helpers ────────────────────────────────────────────────────────────────
+    function showError(title, message) {
+        document.getElementById('error-title').textContent   = title;
+        document.getElementById('error-message').textContent = message;
+        const el = document.getElementById('error-area');
+        el.style.display = 'block';
+        el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function hideError() {
+        document.getElementById('error-area').style.display = 'none';
+    }
+
+    function resetForm() {
+        document.getElementById('pageForm').reset();
+        document.getElementById('result-area').style.display  = 'none';
+        document.getElementById('error-area').style.display   = 'none';
+        document.getElementById('result-content').textContent = '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function copyResult() {
+        const text = document.getElementById('result-content').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.querySelector('[onclick="copyResult()"]');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check me-2"></i>Copied!';
+            btn.classList.replace('btn-outline-primary', 'btn-success');
+            setTimeout(() => {
+                btn.innerHTML = original;
+                btn.classList.replace('btn-success', 'btn-outline-primary');
+            }, 2000);
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,195 @@
+/* ── custom.css ──────────────────────────────────────────────────────────────
+   Base stylesheet for flask-app-template.
+   Loaded by base.html after the Children's Hospital theme and Bootstrap.
+
+   To override in an app without modifying this file:
+     - Add app/static/custom.css to the app repo
+     - It will replace this file via the layered Docker COPY at build time
+     - Alternatively, add a {% block styles %} in your page template for
+       page-specific overrides only
+   ──────────────────────────────────────────────────────────────────────────── */
+
+
+/* ── CSS custom properties (design tokens) ──────────────────────────────── */
+/* Override these in app/static/custom.css to retheme an app without
+   touching any other rules. */
+
+:root {
+    /* Children's Hospital brand colours */
+    --color-primary:      #006dcc;   /* Bootstrap primary (navbar, buttons) */
+    --color-light-blue:   #00A6CE;   /* Theme accent — hover, focus rings    */
+    --color-orange:       #F7971E;   /* Theme accent — highlights, warnings  */
+
+    /* Neutral palette */
+    --color-bg:           #f8f9fa;
+    --color-surface:      #ffffff;
+    --color-border:       #dee2e6;
+    --color-text:         #333333;
+    --color-text-muted:   #6c757d;
+    --color-text-label:   #495057;
+
+    /* Shadows */
+    --shadow-card:        0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --shadow-dropdown:    0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    --shadow-focus:       0 0 0 0.2rem rgba(0, 166, 206, 0.2);
+
+    /* Typography */
+    --font-base:          'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-size-result:   0.95rem;
+    --line-height-result: 1.75;
+}
+
+
+/* ── Base layout & typography ────────────────────────────────────────────── */
+
+body {
+    background-color: var(--color-bg);
+    font-family: var(--font-base);
+}
+
+.display-5 { font-weight: 700; }
+.lead      { font-size: 1.125rem; }
+
+
+/* ── Navbar ──────────────────────────────────────────────────────────────── */
+
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.nav-link          { font-weight: 500; }
+.nav-link:hover    { color: var(--color-light-blue) !important; }
+
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+
+footer {
+    background-color: var(--color-bg);
+    border-top: 1px solid var(--color-border);
+}
+
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+
+.card {
+    box-shadow: var(--shadow-card);
+}
+
+.btn-lg { font-weight: 500; }
+
+
+/* ── Forms ───────────────────────────────────────────────────────────────── */
+
+.form-label {
+    font-weight: 500;
+    color: var(--color-text-label);
+    margin-bottom: 0.5rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-light-blue);
+    box-shadow: var(--shadow-focus);
+}
+
+
+/* ── Dropdowns ───────────────────────────────────────────────────────────── */
+
+.dropdown-menu {
+    border: none;
+    box-shadow: var(--shadow-dropdown);
+}
+
+.dropdown-item:hover {
+    background-color: var(--color-bg);
+    color: var(--color-primary);
+}
+
+
+/* ── Result / output display ─────────────────────────────────────────────── */
+
+/* Standard container for Claude-generated text output.
+   Use <div class="result-content"> in page templates. */
+.result-content {
+    white-space: pre-wrap;
+    line-height: var(--line-height-result);
+    color: var(--color-text);
+    font-size: var(--font-size-result);
+}
+
+/* Scrollable result area for long outputs */
+.result-content-scroll {
+    white-space: pre-wrap;
+    line-height: var(--line-height-result);
+    color: var(--color-text);
+    font-size: var(--font-size-result);
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+
+/* ── Loading states ──────────────────────────────────────────────────────── */
+
+/* Applied to submit button while a request is in flight */
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+/* Fade-in for result and error areas */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0);   }
+}
+
+
+/* ── Theme colour utilities ──────────────────────────────────────────────── */
+
+/* Children's Hospital theme accent colours */
+.text-orange      { color: var(--color-orange) !important; }
+.text-light-blue  { color: var(--color-light-blue) !important; }
+.bg-orange        { background-color: var(--color-orange) !important; }
+.bg-light-blue    { background-color: var(--color-light-blue) !important; }
+
+/* Border accents */
+.border-light-blue { border-color: var(--color-light-blue) !important; }
+.border-orange     { border-color: var(--color-orange) !important; }
+
+
+/* ── Page-level section spacing ──────────────────────────────────────────── */
+
+.page-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.page-header h2 {
+    font-weight: 700;
+}
+
+.page-header p {
+    color: var(--color-text-muted);
+    margin-bottom: 0;
+}
+
+
+/* ── Utility ─────────────────────────────────────────────────────────────── */
+
+/* Consistent icon spacing before labels */
+.form-label i,
+.card-header i,
+.alert-heading i {
+    opacity: 0.85;
+}
+
+/* Subtle divider with more breathing room than Bootstrap's default */
+.section-divider {
+    margin: 2rem 0;
+    border-color: var(--color-border);
+}

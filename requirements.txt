@@ -1,0 +1,21 @@
+# ── Core Flask ─────────────────────────────────────────────────────────────
+Flask==3.0.0
+Werkzeug==3.0.1
+gunicorn==21.2.0
+
+# ── Environment & Config ────────────────────────────────────────────────────
+python-dotenv==1.0.0
+
+# ── Claude API ──────────────────────────────────────────────────────────────
+anthropic==0.40.0
+
+# ── Rate Limiting ───────────────────────────────────────────────────────────
+# Memory-backed (no Redis). Suitable for single-user home network deployments.
+Flask-Limiter==3.5.0
+
+# ── App-specific packages go in app/requirements.txt, not here ─────────────
+# Examples of packages that belong in app/requirements.txt:
+#   python-docx      (Word document handling)
+#   PyPDF2           (PDF processing)
+#   requests         (external HTTP calls)
+#   sqlite3          (built into Python, no install needed)

@@ -11,57 +11,12 @@
     <link href="https://cdn.jsdelivr.net/gh/kylebrothers/childrenstheme@main/dist/theme.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    {# ── App-level custom CSS ── add app/static/custom.css to override without rebuilding #}
-    <style>
-        /* ── Base typography & layout ── */
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .navbar-brand {
-            font-weight: 600;
-            font-size: 1.25rem;
-        }
-        .form-label {
-            font-weight: 500;
-            color: #495057;
-            margin-bottom: 0.5rem;
-        }
-        .display-5 { font-weight: 700; }
-        .lead { font-size: 1.125rem; }
-
-        /* ── Footer ── */
-        footer {
-            background-color: #e9ecef;
-            border-top: 1px solid #dee2e6;
-        }
-
-        /* ── Nav ── */
-        .nav-link { font-weight: 500; }
-        .nav-link:hover { color: #00A6CE !important; }
-
-        /* ── Cards ── */
-        .card {
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        }
-        .btn-lg { font-weight: 500; }
-
-        /* ── Dropdown ── */
-        .dropdown-menu {
-            border: none;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-        }
-        .dropdown-item:hover {
-            background-color: #f8f9fa;
-            color: #006dcc;
-        }
-
-        /* ── Theme colour utilities ── */
-        .text-orange     { color: #F7971E !important; }
-        .text-light-blue { color: #00A6CE !important; }
-        .bg-orange       { background-color: #F7971E !important; }
-        .bg-light-blue   { background-color: #00A6CE !important; }
-    </style>
+    {# ── App-level custom CSS ──
+         Styles live in static/custom.css (template) or app/static/custom.css (app override).
+         To tweak styles for a specific app, add app/static/custom.css to the app repo —
+         it replaces this file via the layered Docker COPY at build time.
+    #}
+    <link href="/static/custom.css" rel="stylesheet">
 
     {# ── Per-page additional styles ── #}
     {% block styles %}{% endblock %}

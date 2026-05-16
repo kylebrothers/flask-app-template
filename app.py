@@ -32,7 +32,17 @@ from config import (
     setup_claude_client, ensure_directories
 )
 from file_processors import process_uploaded_file, validate_file, load_server_files
-from page_handlers import handle_no_call_page, handle_claude_call_page
+try:
+    from page_handlers import handle_no_call_page, handle_claude_call_page
+except ImportError:
+    # App uses register_routes() exclusively and doesn't define these handlers.
+    # Provide fallbacks so generic_api can still return a clean error if hit.
+    def handle_no_call_page(*args, **kwargs):
+        from flask import jsonify
+        return jsonify({'error': 'no-call handler not implemented'}), 501
+    def handle_claude_call_page(*args, **kwargs):
+        from flask import jsonify
+        return jsonify({'error': 'claude-call handler not implemented'}), 501
 from utils import get_session_id, get_server_files_info
 
 # ── Initialise ────────────────────────────────────────────────────────────────

@@ -1,21 +1,9 @@
-# ── new-app-starter/docker-compose.yml ────────────────────────────────────────
-#
-# PLACEHOLDERS — find and replace before use:
-#   myapp          → your app name (lowercase, hyphens ok)
-#   myapp_logs     → {appname}_logs
-#   myapp_server_files → {appname}_server_files
-#   :/Docker/myapp/ → :/Docker/{appname}/
-#   container_name: myapp → container_name: {appname}
-#   myapp-network  → {appname}-network
-#
-# See README.md §new-app-starter for the full substitution table.
-# ─────────────────────────────────────────────────────────────────────────────
-
-version: '3.8'
-
 services:
   myapp:
-    build: .
+    build:
+      context: .
+      args:
+        TEMPLATE_SHA: ${TEMPLATE_SHA:-unknown}
     container_name: myapp
     ports:
       - "${HOST_PORT:-5000}:5000"
@@ -25,19 +13,14 @@ services:
       - CLAUDE_API_KEY=${CLAUDE_API_KEY}
       - SECRET_KEY=${SECRET_KEY}
       - APP_NAME=${APP_NAME:-myapp}
-    env_file:
-      # .env lives on the NAS, not in the repo.
-      # Path is constructed as: NAS_MOUNT_PATH/config/APP_NAME/.env
-      # The Makefile mounts the NAS and sets this path before docker-compose runs.
-      - ${ENV_FILE_PATH:-/mnt/nas/config/myapp/.env}
     volumes:
       - myapp_logs:/app/logs
       - myapp_server_files:/app/server_files
-      # ── Optional: add a database volume if the app uses SQLite ──
+      # ── Uncomment if the app uses SQLite persistence ──
       # - myapp_database:/app/database
       #
       # ── Optional: NAS override for live template editing during development ──
-      # Remove before committing. See README §Development Workflow.
+      # Remove before committing.
       # - /mnt/nas/dev/myapp/templates:/app/templates
     restart: unless-stopped
     networks:

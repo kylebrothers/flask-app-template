@@ -70,6 +70,63 @@ def setup_claude_client():
         return None
 
 
+_resolved_model = None
+_CLAUDE_MODEL_FALLBACK = "claude-sonnet-4-5"
+
+
+def get_claude_model():
+    """
+    Return the Claude model to use for API calls.
+
+    Resolution order:
+      1. CLAUDE_MODEL env var — allows pinning via .env without code changes
+      2. Latest Sonnet from Anthropic models API — always current
+      3. Hardcoded fallback — in case the API call fails
+
+    Result is cached after first call so the models API is only hit once
+    per container lifetime.
+    """
+    global _resolved_model
+    if _resolved_model:
+        return _resolved_model
+
+    logger = logging.getLogger(__name__)
+
+    env_model = os.environ.get("CLAUDE_MODEL", "").strip()
+    if env_model:
+        logger.info(f"Claude model: {env_model} (from CLAUDE_MODEL env var)")
+        _resolved_model = env_model
+        return _resolved_model
+
+    api_key = os.environ.get("CLAUDE_API_KEY", "")
+    if api_key:
+        try:
+            import requests
+            resp = requests.get(
+                "https://api.anthropic.com/v1/models",
+                headers={
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                },
+                timeout=5,
+            )
+            models = resp.json().get("data", [])
+            sonnets = sorted(
+                [m["id"] for m in models if "sonnet" in m["id"].lower()],
+                reverse=True,
+            )
+            if sonnets:
+                _resolved_model = sonnets[0]
+                logger.info(f"Claude model: {_resolved_model} (latest Sonnet from API)")
+                return _resolved_model
+        except Exception as e:
+            logger.warning(f"Could not resolve latest Sonnet from models API: {e}")
+
+    logger.warning(f"Claude model: {_CLAUDE_MODEL_FALLBACK} (fallback)")
+    _resolved_model = _CLAUDE_MODEL_FALLBACK
+    return _resolved_model
+
+
 def ensure_directories():
     """
     Create required runtime directories if they don't exist.
